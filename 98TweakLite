@@ -1,0 +1,301 @@
+#!/system/bin/sh
+#
+# file: /system/etc/init.d/98spicaTweakLite v1.7.2
+# - adapted from "SSSwitch by voku1987 [voku(at)voku-online(dot)de] (Screen State Switch Lite)"
+#  
+
+
+# =========
+# One-time tweaks to apply on every boot;
+# =========
+MMC=`ls -d /sys/block/mmc*`;
+
+# =========
+# Remount all partitions
+# =========
+for j in $(busybox mount | cut -d " " -f3);
+do
+	sync;
+	busybox mount -o remount,noatime,nodiratime $j;
+done;
+
+for k in $(busybox mount | grep relatime | cut -d " " -f3);
+do
+	sync;
+	busybox mount -o remount,noatime,nodiratime $k;
+done;
+
+for l in $(busybox mount | grep ext3 | cut -d " " -f3);
+do
+	sync;
+	busybox mount -o remount,noatime,nodiratime,commit=15 $l;
+done;
+
+for m in $(busybox mount | grep ext4 | cut -d " " -f3);
+do
+	sync;
+	busybox mount -o remount,noatime,nodiratime,commit=15 $m;
+done;
+
+# =========
+# Optimize io scheduler
+# =========
+for i in $MMC;
+do
+	if [ -e $i/queue/scheduler ];
+	then
+		/system/xbin/echo "bfq" > $i/queue/scheduler;
+	fi;
+
+	if [ -e $i/queue/rotational ]; 
+	then
+		/system/xbin/echo "0" > $i/queue/rotational; 
+	fi;
+
+	if [ -e $i/queue/iostats ];
+	then
+		/system/xbin/echo "0" > $k/queue/iostats;
+	fi;
+
+	if [ -e $i/queue/iosched/group_isolation ];
+	then
+		/system/xbin/echo "0" > $i/queue/iosched/group_isolation;
+	fi;
+
+	if [ -e $i/queue/iosched/slice_idle ];
+	then
+		/system/xbin/echo "0" > $i/queue/iosched/slice_idle;
+	fi;
+
+	if [ -e $i/queue/iosched/back_seek_penalty ];
+	then
+		/system/xbin/echo "1" > $i/queue/iosched/back_seek_penalty;
+	fi;
+
+	if [ -e $i/queue/iosched/slice_async_rq ];
+	then
+		/system/xbin/echo "2" > $i/queue/iosched/slice_async_rq;
+	fi;
+
+	if [ -e $i/queue/iosched/quantu ];
+	then
+		/system/xbin/echo "16" > $i/queue/iosched/quantum;
+	fi;
+
+	if [ -e $i/queue/read_ahead_kb ];
+	then
+		/system/xbin/echo "256" > $i/queue/read_ahead_kb;
+	fi;
+
+	if [ -e $i/queue/nr_requests ];
+	then
+		/system/xbin/echo "2048" > $i/queue/nr_requests;
+	fi;
+
+	if [ -e $i/queue/iosched/back_seek_max ];
+	then
+		/system/xbin/echo "1000000000" > $i/queue/iosched/back_seek_max;
+	fi;
+done;
+
+# =========
+# TWEAKS: for TCP read/write
+# =========
+/system/xbin/echo "0" > /proc/sys/net/ipv4/tcp_timestamps;
+/system/xbin/echo "1" > /proc/sys/net/ipv4/tcp_tw_reuse;
+/system/xbin/echo "1" > /proc/sys/net/ipv4/tcp_sack;
+/system/xbin/echo "1" > /proc/sys/net/ipv4/tcp_tw_recycle;
+/system/xbin/echo "1" > /proc/sys/net/ipv4/tcp_window_scaling;
+/system/xbin/echo "1" > /proc/sys/net/ipv4/tcp_moderate_rcvbuf;
+/system/xbin/echo "1" > /proc/sys/net/ipv4/route/flush;
+/system/xbin/echo "5" > /proc/sys/net/ipv4/tcp_keepalive_probes;
+/system/xbin/echo "30" > /proc/sys/net/ipv4/tcp_keepalive_intvl;
+/system/xbin/echo "30" > /proc/sys/net/ipv4/tcp_fin_timeout;
+/system/xbin/echo "404480" > /proc/sys/net/core/wmem_max;
+/system/xbin/echo "404480" > /proc/sys/net/core/rmem_max;
+/system/xbin/echo "256960" > /proc/sys/net/core/rmem_default;
+/system/xbin/echo "256960" > /proc/sys/net/core/wmem_default;
+/system/xbin/echo "20480" > /proc/sys/net/core/optmem_max;
+/system/xbin/echo "4096 16384 404480" > /proc/sys/net/ipv4/tcp_wmem;
+/system/xbin/echo "4096 87380 404480" > /proc/sys/net/ipv4/tcp_rmem;
+/system/xbin/echo "4096" > /proc/sys/net/ipv4/udp_rmem_min;
+/system/xbin/echo "4096" > /proc/sys/net/ipv4/udp_wmem_min;
+setprop net.tcp.buffersize.default 4096,87380,404480,4096,16384,404480;
+setprop net.tcp.buffersize.wifi 4096,87380,404480,4096,16384,404480;
+setprop net.tcp.buffersize.umts 4096,87380,404480,4096,16384,404480;
+
+# =========
+# TWEAKS: optimized for 3G/Edge speed
+# =========
+setprop ro.ril.hsxpa 2;
+setprop ro.ril.gprsclass 12;
+setprop ro.ril.hep 1;
+setprop ro.ril.enable.dtm 1;
+setprop ro.ril.hsdpa.category 8;
+setprop ro.ril.enable.a53 1;
+setprop ro.ril.enable.3g.prefix 1;
+setprop ro.ril.htcmaskw1.bitmask 4294967295;
+setprop ro.ril.htcmaskw1 14449;
+setprop ro.ril.hsupa.category 5;
+
+# =========
+# TWEAKS
+# =========
+setprop debug.performance.tuning 1; 
+setprop video.accelerate.hw 1;
+setprop debug.sf.hw 1;
+setprop ro.telephony.call_ring.delay 1000;
+setprop wifi.supplicant_scan_interval 180;
+setprop windowsmgr.max_events_per_sec 60;
+setprop ro.media.dec.jpeg.memcap 20000000;
+setprop ro.media.enc.jpeg.quality 95,85,75;
+setprop dalvik.vm.startheapsize 12m;
+setprop dalvik.vm.heapsize 32m;
+sysctl -w kernel.sem="500 512000 100 2048";
+sysctl -w kernel.shmmax=268435456;
+/system/xbin/echo "8" > /proc/sys/vm/page-cluster;
+/system/xbin/echo "1" /proc/sys/kernel/sched_compat_yield;
+/system/xbin/echo "0" /proc/sys/kernel/sched_child_runs_first;
+/system/xbin/echo "256000" /proc/sys/kernel/sched_shares_ratelimit;
+/system/xbin/echo "64000" > /proc/sys/kernel/msgmni;
+/system/xbin/echo "64000" > /proc/sys/kernel/msgmax;
+/system/xbin/echo "10" > /proc/sys/fs/lease-break-time;
+/system/xbin/echo "500 512000 64 2048" > /proc/sys/kernel/sem;
+/system/xbin/echo "5000" > /proc/sys/kernel/threads-max;
+/system/xbin/echo "0" > /proc/sys/vm/oom_kill_allocating_task;
+/system/xbin/echo "0" > /proc/sys/vm/panic_on_oom;
+
+# =========
+# MEMORY-TWEAKS
+# =========
+/system/xbin/echo "50" > /proc/sys/vm/swappiness;
+/system/xbin/echo "50" > /proc/sys/vm/vfs_cache_pressure;
+/system/xbin/echo "4096" > /proc/sys/vm/min_free_kbytes;
+/system/xbin/echo "500" > /proc/sys/vm/dirty_expire_centisecs;
+/system/xbin/echo "3000" > /proc/sys/vm/dirty_writeback_centisecs;
+/system/xbin/echo "22" > /proc/sys/vm/dirty_ratio;
+/system/xbin/echo "4" > /proc/sys/vm/dirty_background_ratio;
+/system/xbin/echo "3" > /proc/sys/vm/drop_caches;
+/system/xbin/echo "1" > /proc/sys/vm/overcommit_memory;
+/system/xbin/echo "8" > /proc/sys/vm/min_free_order_shift;
+#/system/xbin/echo "0,1,2,4,6,15" > /sys/module/lowmemorykiller/parameters/adj;
+/system/xbin/echo "0" > /sys/module/lowmemorykiller/parameters/debug_level;
+/system/xbin/echo "64" > /sys/module/lowmemorykiller/parameters/cost;
+# Define the memory thresholds at which the above process classes will
+# be killed. These numbers are in pages (4k) -> (1 MB * 1024) / 4 = 256
+FOREGROUND_APP_MEM=1536;
+VISIBLE_APP_MEM=2048;
+SECONDARY_SERVER_MEM=4096;
+BACKUP_APP_MEM=4096;
+HOME_APP_MEM=4096;
+HIDDEN_APP_MEM=5120;
+CONTENT_PROVIDER_MEM=15360;
+EMPTY_APP_MEM=23040;
+/system/xbin/echo "$FOREGROUND_APP_MEM,$VISIBLE_APP_MEM,$SECONDARY_SERVER_MEM,$HIDDEN_APP_MEM,$CONTENT_PROVIDER_MEM,$EMPTY_APP_MEM" > /sys/module/lowmemorykiller/parameters/minfree;
+
+# =========
+# Firewall-TWEAKS
+# =========
+
+# ping/icmp protection
+/system/xbin/echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts;
+/system/xbin/echo "1" > /proc/sys/net/ipv4/icmp_echo_ignore_all;
+/system/xbin/echo "1" > /proc/sys/net/ipv4/icmp_ignore_bogus_error_responses;
+
+if [ -e /proc/sys/net/ipv6/icmp_echo_ignore_broadcasts ];
+then
+	/system/xbin/echo "1" > /proc/sys/net/ipv6/icmp_echo_ignore_broadcasts;
+fi
+
+if [ -e /proc/sys/net/ipv6/icmp_echo_ignore_all ];
+then
+	/system/xbin/echo "1" > /proc/sys/net/ipv6/icmp_echo_ignore_all;
+fi
+
+if [ -e /proc/sys/net/ipv6/icmp_ignore_bogus_error_responses ];
+then
+	/system/xbin/echo "1" > /proc/sys/net/ipv6/icmp_ignore_bogus_error_responses;
+fi
+
+# syn protection
+/system/xbin/echo "2" > /proc/sys/net/ipv4/tcp_synack_retries;
+
+if [ -e /proc/sys/net/ipv6/tcp_synack_retries ];
+then
+	/system/xbin/echo "2" > /proc/sys/net/ipv6/tcp_synack_retries;
+fi
+
+if [ -e /proc/sys/net/ipv6/tcp_syncookies ];
+then
+	/system/xbin/echo "0" > /proc/sys/net/ipv6/tcp_syncookies;
+fi
+
+if [ -e /proc/sys/net/ipv4/tcp_syncookies ];
+then
+	/system/xbin/echo "1" > /proc/sys/net/ipv4/tcp_syncookies;
+fi
+
+# IPv6 privacy tweak
+/system/xbin/echo "2" > /proc/sys/net/ipv6/conf/all/use_tempaddr;
+
+# drop spoof, redirects, etc
+/system/xbin/echo "1" > /proc/sys/net/ipv4/conf/all/rp_filter;
+/system/xbin/echo "1" > /proc/sys/net/ipv4/conf/default/rp_filter;
+/system/xbin/echo "0" > /proc/sys/net/ipv4/conf/all/send_redirects;
+/system/xbin/echo "0" > /proc/sys/net/ipv4/conf/default/send_redirects;
+/system/xbin/echo "0" > /proc/sys/net/ipv4/conf/default/accept_redirects;
+/system/xbin/echo "0" > /proc/sys/net/ipv4/conf/all/accept_source_route;
+/system/xbin/echo "0" > /proc/sys/net/ipv4/conf/default/accept_source_route;
+
+if [ -e /proc/sys/net/ipv6/conf/all/rp_filter ];
+then
+	/system/xbin/echo "1" > /proc/sys/net/ipv6/conf/all/rp_filter;
+fi
+
+if [ -e /proc/sys/net/ipv6/conf/default/rp_filter ];
+then
+	/system/xbin/echo "1" > /proc/sys/net/ipv6/conf/default/rp_filter;
+fi
+
+if [ -e /proc/sys/net/ipv6/conf/all/send_redirects ];
+then
+	/system/xbin/echo "0" > /proc/sys/net/ipv6/conf/all/send_redirects;
+fi
+
+if [ -e /proc/sys/net/ipv6/conf/default/send_redirects ];
+then
+	/system/xbin/echo "0" > /proc/sys/net/ipv6/conf/default/send_redirects;
+fi
+
+if [ -e /proc/sys/net/ipv6/conf/default/accept_redirects ];
+then
+	/system/xbin/echo "0" > /proc/sys/net/ipv6/conf/default/accept_redirects;
+fi
+
+if [ -e /proc/sys/net/ipv6/conf/all/accept_source_route ];
+then
+	/system/xbin/echo "0" > /proc/sys/net/ipv6/conf/all/accept_source_route;
+fi
+
+if [ -e /proc/sys/net/ipv6/conf/default/accept_source_route ];
+then
+	/system/xbin/echo "0" > /proc/sys/net/ipv6/conf/default/accept_source_route;
+fi
+
+# =========
+# Renice kswapd0 - kernel thread responsible for managing the memory
+# =========
+renice 6 `pidof kswapd0`
+
+# =========
+# CleanUp
+# =========
+
+#drop caches to free some memory
+sync;
+/system/xbin/echo "3" > /proc/sys/vm/drop_caches;
+sleep 1;
+/system/xbin/echo "1" > /proc/sys/vm/drop_caches; 
+
+
+log -p i -t Tweak_Lite_v1.7.2 "*** BOOT tweaks ***: applied miscellaneous performance tweaks";
