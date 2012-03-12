@@ -54,7 +54,7 @@ do
 
 	if [ -e $i/queue/iostats ];
 	then
-		/system/xbin/echo "0" > $k/queue/iostats;
+		/system/xbin/echo "0" > $i/queue/iostats;
 	fi;
 
 	if [ -e $i/queue/iosched/group_isolation ];
