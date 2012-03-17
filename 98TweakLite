@@ -1,6 +1,6 @@
 #!/system/bin/sh
 #
-# file: /system/etc/init.d/98spicaTweakLite v1.7.2
+# file: /system/etc/init.d/98spicaTweakLite v1.7.3
 # - adapted from "SSSwitch by voku1987 [voku(at)voku-online(dot)de] (Screen State Switch Lite)"
 #  
 
@@ -178,7 +178,7 @@ sysctl -w kernel.shmmax=268435456;
 /system/xbin/echo "3" > /proc/sys/vm/drop_caches;
 /system/xbin/echo "1" > /proc/sys/vm/overcommit_memory;
 /system/xbin/echo "8" > /proc/sys/vm/min_free_order_shift;
-#/system/xbin/echo "0,1,2,4,6,15" > /sys/module/lowmemorykiller/parameters/adj;
+/system/xbin/echo "0,1,2,4,6,15" > /sys/module/lowmemorykiller/parameters/adj;
 /system/xbin/echo "0" > /sys/module/lowmemorykiller/parameters/debug_level;
 /system/xbin/echo "64" > /sys/module/lowmemorykiller/parameters/cost;
 # Define the memory thresholds at which the above process classes will
@@ -192,6 +192,44 @@ HIDDEN_APP_MEM=5120;
 CONTENT_PROVIDER_MEM=15360;
 EMPTY_APP_MEM=23040;
 /system/xbin/echo "$FOREGROUND_APP_MEM,$VISIBLE_APP_MEM,$SECONDARY_SERVER_MEM,$HIDDEN_APP_MEM,$CONTENT_PROVIDER_MEM,$EMPTY_APP_MEM" > /sys/module/lowmemorykiller/parameters/minfree;
+
+# =========
+# zipalign-TWEAKS
+# =========
+LOG_FILE=/data/zipalign.log;
+ZIPALIGNDB=/data/zipalign.db;
+if [ -e $LOG_FILE ]; then
+	rm $LOG_FILE;
+fi;
+
+if [ ! -f $ZIPALIGNDB ]; then
+	touch $ZIPALIGNDB;
+fi;
+/system/xbin/echo "Starting FV Automatic ZipAlign $( date +"%m-%d-%Y %H:%M:%S" )" | tee -a $LOG_FILE;
+for DIR in /system/app /system/framework; 
+do
+	cd $DIR;
+	for APK in *.apk *.jar;
+	do
+			zipalign -c 4 $APK;
+ 			if [ $? -eq 0 ]; 
+			then
+				/system/xbin/echo "Already aligned: $DIR/$APK" | tee -a $LOG_FILE;
+ 				grep "$DIR/$APK" $ZIPALIGNDB > /dev/null || echo $DIR/$APK >> $ZIPALIGNDB;
+			else
+				/system/xbin/echo "Now aligning: $DIR/$APK" | tee -a $LOG_FILE;
+				zipalign -f 4 $APK /cache/$APK;
+				busybox mount -o rw,remount /system;
+				cp -f -p /cache/$APK $APK;
+				busybox rm -f /cache/$APK;
+				grep "$DIR/$APK" $ZIPALIGNDB > /dev/null || echo $DIR/$APK >> $ZIPALIGNDB;
+			fi;
+	done;
+done;
+busybox mount -o ro,remount /system;
+sleep 3;
+touch $ZIPALIGNDB;
+/system/xbin/echo "Automatic ZipAlign finished at $( date +"%m-%d-%Y %H:%M:%S" )" | tee -a $LOG_FILE;
 
 # =========
 # Firewall-TWEAKS
@@ -283,9 +321,11 @@ then
 fi
 
 # =========
-# Renice kswapd0 - kernel thread responsible for managing the memory
+# Renice - kernel thread responsible for managing the memory
 # =========
-renice 6 `pidof kswapd0`
+renice 19 `pidof kswapd0`;
+renice -4 `pidof android.process.acore`;
+renice -12 `pidof com.android.phone`;
 
 # =========
 # CleanUp
@@ -298,4 +338,4 @@ sleep 1;
 /system/xbin/echo "1" > /proc/sys/vm/drop_caches; 
 
 
-log -p i -t Tweak_Lite_v1.7.2 "*** BOOT tweaks ***: applied miscellaneous performance tweaks";
+log -p i -t Tweak_Lite_v1.7.3 "*** BOOT tweaks ***: applied miscellaneous performance tweaks";
