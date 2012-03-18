@@ -148,7 +148,7 @@ setprop ro.telephony.call_ring.delay 1000;
 setprop wifi.supplicant_scan_interval 180;
 setprop windowsmgr.max_events_per_sec 60;
 setprop ro.media.dec.jpeg.memcap 20000000;
-setprop ro.media.enc.jpeg.quality 95,85,75;
+setprop ro.media.enc.jpeg.quality 90,80,70;
 setprop dalvik.vm.startheapsize 12m;
 setprop dalvik.vm.heapsize 32m;
 sysctl -w kernel.sem="500 512000 100 2048";
