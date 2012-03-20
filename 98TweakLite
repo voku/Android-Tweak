@@ -82,7 +82,7 @@ do
 		/system/xbin/echo "2" > $i/queue/iosched/slice_async_rq;
 	fi;
 
-	if [ -e $i/queue/iosched/quantu ];
+	if [ -e $i/queue/iosched/quantum ];
 	then
 		/system/xbin/echo "16" > $i/queue/iosched/quantum;
 	fi;
