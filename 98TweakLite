@@ -1,6 +1,6 @@
 #!/system/bin/sh
 #
-# file: /system/etc/init.d/98spicaTweakLite v1.7.3
+# file: /system/etc/init.d/98spicaTweakLite v1.7.4
 # - adapted from "SSSwitch by voku1987 [voku(at)voku-online(dot)de] (Screen State Switch Lite)"
 #  
 
@@ -357,4 +357,4 @@ sleep 1;
 /system/xbin/echo "1" > /proc/sys/vm/drop_caches; 
 
 
-log -p i -t Tweak_Lite_v1.7.3 "*** BOOT tweaks ***: applied miscellaneous performance tweaks";
+log -p i -t Tweak_Lite_v1.7.4 "*** BOOT tweaks ***: applied miscellaneous performance tweaks";
