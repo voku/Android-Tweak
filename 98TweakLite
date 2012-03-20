@@ -37,6 +37,11 @@ do
 	busybox mount -o remount,noatime,nodiratime,commit=15 $m;
 done;
 
+# testing for ext3 & ext4
+#mount -o remount,noatime,delalloc,noauto_da_alloc,barrier=1 /system /system
+#mount -o remount,noatime,delalloc,noauto_da_alloc,barrier=0 /cache /cache
+#mount -o remount,noatime,delalloc,noauto_da_alloc,barrier=0 /data /data
+
 # =========
 # Optimize io scheduler
 # =========
@@ -154,9 +159,9 @@ setprop dalvik.vm.heapsize 32m;
 sysctl -w kernel.sem="500 512000 100 2048";
 sysctl -w kernel.shmmax=268435456;
 /system/xbin/echo "8" > /proc/sys/vm/page-cluster;
-/system/xbin/echo "1" /proc/sys/kernel/sched_compat_yield;
-/system/xbin/echo "0" /proc/sys/kernel/sched_child_runs_first;
-/system/xbin/echo "256000" /proc/sys/kernel/sched_shares_ratelimit;
+/system/xbin/echo "1" > /proc/sys/kernel/sched_compat_yield;
+/system/xbin/echo "0" > /proc/sys/kernel/sched_child_runs_first;
+/system/xbin/echo "256000" > /proc/sys/kernel/sched_shares_ratelimit;
 /system/xbin/echo "64000" > /proc/sys/kernel/msgmni;
 /system/xbin/echo "64000" > /proc/sys/kernel/msgmax;
 /system/xbin/echo "10" > /proc/sys/fs/lease-break-time;
@@ -192,6 +197,20 @@ HIDDEN_APP_MEM=5120;
 CONTENT_PROVIDER_MEM=15360;
 EMPTY_APP_MEM=23040;
 /system/xbin/echo "$FOREGROUND_APP_MEM,$VISIBLE_APP_MEM,$SECONDARY_SERVER_MEM,$HIDDEN_APP_MEM,$CONTENT_PROVIDER_MEM,$EMPTY_APP_MEM" > /sys/module/lowmemorykiller/parameters/minfree;
+
+# =========
+# SQLite mods
+# =========
+for i in `find /data -iname "*.db"`;
+do
+	/system/xbin/sqlite3 $i 'VACUUM;'; 
+        /system/xbin/sqlite3 $i 'PRAGMA journal_mode = WAL;'; 
+        /system/xbin/sqlite3 $i 'PRAGMA temp_store = MEMORY;';  
+        /system/xbin/sqlite3 $i 'PRAGMA count_changes = OFF;';  
+        /system/xbin/sqlite3 $i 'PRAGMA synchronous = OFF;';  
+        /system/xbin/sqlite3 $i 'PRAGMA auto_vacuum = FULL;';  
+        /system/xbin/sqlite3 $i 'PRAGMA wal_autocheckpoint = 0;';   
+done;
 
 # =========
 # zipalign-TWEAKS
