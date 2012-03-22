@@ -199,11 +199,23 @@ EMPTY_APP_MEM=23040;
 /system/xbin/echo "$FOREGROUND_APP_MEM,$VISIBLE_APP_MEM,$SECONDARY_SERVER_MEM,$HIDDEN_APP_MEM,$CONTENT_PROVIDER_MEM,$EMPTY_APP_MEM" > /sys/module/lowmemorykiller/parameters/minfree;
 
 # =========
-# SQLite mods
+# SQLite tweaks
 # =========
 for i in `find /data -iname "*.db"`;
 do
-	/system/xbin/sqlite3 $i 'VACUUM;'; 
+	/system/xbin/sqlite3 $i 'VACUUM;';
+	/system/xbin/sqlite3 $i 'REINDEX;'; 
+        /system/xbin/sqlite3 $i 'PRAGMA journal_mode = WAL;'; 
+        /system/xbin/sqlite3 $i 'PRAGMA temp_store = MEMORY;';  
+        /system/xbin/sqlite3 $i 'PRAGMA count_changes = OFF;';  
+        /system/xbin/sqlite3 $i 'PRAGMA synchronous = OFF;';  
+        /system/xbin/sqlite3 $i 'PRAGMA auto_vacuum = FULL;';  
+        /system/xbin/sqlite3 $i 'PRAGMA wal_autocheckpoint = 0;';   
+done;
+for i in `find /sdcard -iname "*.db"`;
+do
+	/system/xbin/sqlite3 $i 'VACUUM;';
+	/system/xbin/sqlite3 $i 'REINDEX;'; 
         /system/xbin/sqlite3 $i 'PRAGMA journal_mode = WAL;'; 
         /system/xbin/sqlite3 $i 'PRAGMA temp_store = MEMORY;';  
         /system/xbin/sqlite3 $i 'PRAGMA count_changes = OFF;';  
