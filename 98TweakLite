@@ -8,7 +8,11 @@
 # =========
 # One-time tweaks to apply on every boot;
 # =========
+STL=`ls -d /sys/block/stl*`;
+BML=`ls -d /sys/block/bml*`;
 MMC=`ls -d /sys/block/mmc*`;
+ZRM=`ls -d /sys/block/zram*`;
+MTD=`ls -d /sys/block/mtd*`;
 
 # =========
 # Remount all partitions
@@ -45,7 +49,7 @@ done;
 # =========
 # Optimize io scheduler
 # =========
-for i in $MMC;
+for i in $STL $BML $MMC $ZRM $MTD;
 do
 	if [ -e $i/queue/scheduler ];
 	then
