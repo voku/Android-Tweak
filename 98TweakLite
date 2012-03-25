@@ -136,16 +136,17 @@ setprop net.tcp.buffersize.umts 4096,87380,404480,4096,16384,404480;
 # =========
 # TWEAKS: optimized for 3G/Edge speed
 # =========
-setprop ro.ril.hsxpa 2;
-setprop ro.ril.gprsclass 12;
 setprop ro.ril.hep 1;
 setprop ro.ril.enable.dtm 1;
-setprop ro.ril.hsdpa.category 8;
 setprop ro.ril.enable.a53 1;
 setprop ro.ril.enable.3g.prefix 1;
-setprop ro.ril.htcmaskw1.bitmask 4294967295;
-setprop ro.ril.htcmaskw1 14449;
+setprop ro.ril.enable.a52 1;
+setprop ro.ril.enable.a53 1;
+setprop ro.ril.emc.mode 2;
+setprop ro.ril.hsxpa 2;
 setprop ro.ril.hsupa.category 5;
+setprop ro.ril.hsdpa.category 8;
+setprop ro.ril.gprsclass 12;
 
 # =========
 # TWEAKS
