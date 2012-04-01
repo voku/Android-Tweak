@@ -32,19 +32,17 @@ done;
 for l in $(busybox mount | grep ext3 | cut -d " " -f3);
 do
 	sync;
-	busybox mount -o remount,noatime,nodiratime,commit=15 $l;
+	busybox mount -o remount,noatime,nodiratime,delalloc,noauto_da_alloc,commit=15 $l;
 done;
 
 for m in $(busybox mount | grep ext4 | cut -d " " -f3);
 do
 	sync;
-	busybox mount -o remount,noatime,nodiratime,commit=15 $m;
+	busybox mount -o remount,noatime,nodiratime,delalloc,noauto_da_alloc,commit=15 $m;
 done;
 
 # testing for ext3 & ext4
-#mount -o remount,noatime,delalloc,noauto_da_alloc,barrier=1 /system /system
-#mount -o remount,noatime,delalloc,noauto_da_alloc,barrier=0 /cache /cache
-#mount -o remount,noatime,delalloc,noauto_da_alloc,barrier=0 /data /data
+
 
 # =========
 # Optimize io scheduler
@@ -66,20 +64,20 @@ do
 		/system/xbin/echo "0" > $i/queue/iostats;
 	fi;
 
-	if [ -e $i/queue/iosched/group_isolation ];
-	then
-		/system/xbin/echo "0" > $i/queue/iosched/group_isolation;
-	fi;
+	#if [ -e $i/queue/iosched/group_isolation ];
+	#then
+	#	/system/xbin/echo "0" > $i/queue/iosched/group_isolation;
+	#fi;
 
-	if [ -e $i/queue/iosched/slice_idle ];
-	then
-		/system/xbin/echo "0" > $i/queue/iosched/slice_idle;
-	fi;
+	#if [ -e $i/queue/iosched/slice_idle ];
+	#then
+	#	/system/xbin/echo "0" > $i/queue/iosched/slice_idle;
+	#fi;
 
-	if [ -e $i/queue/iosched/back_seek_penalty ];
-	then
-		/system/xbin/echo "1" > $i/queue/iosched/back_seek_penalty;
-	fi;
+	#if [ -e $i/queue/iosched/back_seek_penalty ];
+	#then
+	#	/system/xbin/echo "1" > $i/queue/iosched/back_seek_penalty;
+	#fi;
 
 	if [ -e $i/queue/iosched/slice_async_rq ];
 	then
@@ -91,20 +89,20 @@ do
 		/system/xbin/echo "16" > $i/queue/iosched/quantum;
 	fi;
 
-	if [ -e $i/queue/read_ahead_kb ];
-	then
-		/system/xbin/echo "256" > $i/queue/read_ahead_kb;
-	fi;
+	#if [ -e $i/queue/read_ahead_kb ];
+	#then
+	#	/system/xbin/echo "256" > $i/queue/read_ahead_kb;
+	#fi;
 
-	if [ -e $i/queue/nr_requests ];
-	then
-		/system/xbin/echo "2048" > $i/queue/nr_requests;
-	fi;
+	#if [ -e $i/queue/nr_requests ];
+	#then
+	#	/system/xbin/echo "2048" > $i/queue/nr_requests;
+	#fi;
 
-	if [ -e $i/queue/iosched/back_seek_max ];
-	then
-		/system/xbin/echo "1000000000" > $i/queue/iosched/back_seek_max;
-	fi;
+	#if [ -e $i/queue/iosched/back_seek_max ];
+	#then
+	#	/system/xbin/echo "1000000000" > $i/queue/iosched/back_seek_max;
+	#fi;
 done;
 
 # =========
@@ -178,9 +176,9 @@ sysctl -w kernel.shmmax=268435456;
 # =========
 # MEMORY-TWEAKS
 # =========
-/system/xbin/echo "0" > /proc/sys/vm/swappiness;
+/system/xbin/echo "50" > /proc/sys/vm/swappiness;
 /system/xbin/echo "50" > /proc/sys/vm/vfs_cache_pressure;
-/system/xbin/echo "4096" > /proc/sys/vm/min_free_kbytes;
+/system/xbin/echo "2048" > /proc/sys/vm/min_free_kbytes;
 /system/xbin/echo "500" > /proc/sys/vm/dirty_expire_centisecs;
 /system/xbin/echo "3000" > /proc/sys/vm/dirty_writeback_centisecs;
 /system/xbin/echo "22" > /proc/sys/vm/dirty_ratio;
