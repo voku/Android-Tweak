@@ -29,19 +29,11 @@ do
 	busybox mount -o remount,noatime,nodiratime $k;
 done;
 
-for l in $(busybox mount | grep ext3 | cut -d " " -f3);
-do
-	sync;
-	busybox mount -o remount,noatime,nodiratime,delalloc,noauto_da_alloc,commit=15 $l;
-done;
-
-for m in $(busybox mount | grep ext4 | cut -d " " -f3);
+for m in $(busybox mount | grep ext[3-4] | cut -d " " -f3);
 do
 	sync;
 	busybox mount -o remount,noatime,nodiratime,delalloc,noauto_da_alloc,commit=15 $m;
 done;
-
-# testing for ext3 & ext4
 
 
 # =========
