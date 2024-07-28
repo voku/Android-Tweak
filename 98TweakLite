@@ -189,7 +189,7 @@ setprop net.tcp.buffersize.evdo_b  4094,87380,262144,4096,16384,262144;
 setprop net.tcp.buffersize.hspa    4092,87380,563200,4096,16384,110208;
 
 # =========
-# TWEAKS: optimized for 3G/Edge speed
+# TWEAKS: optimized for 4G/Edge speed
 # =========
 setprop ro.ril.hep 1;
 setprop ro.ril.enable.dtm 1;
